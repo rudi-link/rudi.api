@@ -1,13 +1,13 @@
 import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import authorRouter from './routes/author.router';
-import bookRouter from './routes/book.router';
-import authRouter from './routes/auth.router';
-import profileRouter from './routes/profile.router';
 import { notFoundHandler } from './middleware/not-found';
 import { errorHandler } from './middleware/error-handler';
 import cookieParser from 'cookie-parser';
+import { AuthRouter } from './modules/auth/auth.router';
+import { ApiRouter } from './modules/api/api.router';
+import { VisiteRouter } from './modules/visite/visite.router';
+import { LinkRouter } from './modules/link/link.router';
 
 dotenv.config();
 
@@ -23,6 +23,7 @@ const corsOptions = {
   optionsSuccessStatus: 204,
 };
 app.use(cors(corsOptions));
+
 // JSON Middleware & Form Data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,10 +32,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Main Routes
-app.use('/api/auth', authRouter);
-app.use('/api/profile', profileRouter);
-app.use('/api/authors', authorRouter);
-app.use('/api/books', bookRouter);
+app.use('/auth', AuthRouter)
+app.use('/api', ApiRouter)
+app.use('/visite', VisiteRouter)
+app.use('/link', LinkRouter)
 
 // Not Found Middleware
 app.use(notFoundHandler);

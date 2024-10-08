@@ -3,36 +3,64 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Author {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  Book      Book[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Book {
-  id            Int      @id @default(autoincrement())
-  title         String
-  isFiction     Boolean
-  datePublished DateTime
-  author        Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  authorId      Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
 model User {
-  id        String   @id @unique
-  fullName  String
-  username  String   @unique
-  password  String
-  email     String
+  id        String   @id @default(cuid())
+  name      String   @unique
+  code      String[]
+  avatar    String?
+  api       api[]
+  visite    visite[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  link      link[]
+}
+
+model api {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  data      Json
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  isPrivate Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model visite {
+  id        String    @id
+  name      String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  visiter   visiter[]
+}
+
+enum TVisiter {
+  site
+  link
+}
+
+model visiter {
+  id        String    @id
+  visite    visite?   @relation(fields: [visiteId], references: [id])
+  type      TVisiter
+  createdAt DateTime  @default(now())
+  outedAt   DateTime?
+  visiteId  String?
+  link      link?     @relation(fields: [linkId], references: [id])
+  linkId    String?
+}
+
+model link {
+  id      String    @id
+  website String
+  tag     String    @default("default")
+  user    User      @relation(fields: [userId], references: [id])
+  visiter visiter[]
+  userId  String
 }

@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use('/auth', AuthRouter)
 app.use('/api', ApiRouter)
 app.use('/visite', VisiteRouter)
-app.use('/link', LinkRouter)
+app.use('/', LinkRouter)
 
 // Not Found Middleware
 app.use(notFoundHandler);

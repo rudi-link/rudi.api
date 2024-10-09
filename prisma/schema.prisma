@@ -40,27 +40,33 @@ model visite {
   visiter   visiter[]
 }
 
-enum TVisiter {
-  site
-  link
-}
-
 model visiter {
   id        String    @id
   visite    visite?   @relation(fields: [visiteId], references: [id])
-  type      TVisiter
+  visiteId  String?
   createdAt DateTime  @default(now())
   outedAt   DateTime?
-  visiteId  String?
-  link      link?     @relation(fields: [linkId], references: [id])
-  linkId    String?
 }
 
 model link {
-  id      String    @id
+  id      String @id
   website String
-  tag     String    @default("default")
-  user    User      @relation(fields: [userId], references: [id])
-  visiter visiter[]
+  user    User   @relation(fields: [userId], references: [id])
   userId  String
+  tag     tag[]
+}
+
+model tag {
+  id     String  @id
+  name   String
+  link   link    @relation(fields: [linkId], references: [id])
+  linkId String
+  click  click[]
+}
+
+model click {
+  id        String   @id
+  tag       tag      @relation(fields: [tagId], references: [id])
+  tagId     String
+  createdAt DateTime @default(now())
 }

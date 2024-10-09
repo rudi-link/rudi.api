@@ -42,6 +42,15 @@ export async function get(request: Request, res: Response, next: NextFunction) {
       }
     })
 
+    await db.link.update({
+      where: {
+        id
+      },
+      data: {
+        checked: true
+      }
+    })
+
     return res.send(rs)
   } catch (error) {
     next(error);
@@ -101,6 +110,15 @@ export async function use(request: Request, res: Response, next: NextFunction) {
         tagId: Number(id.split('#')[0] || 0)
       },
     });
+
+    await db.link.update({
+      where: {
+        id: id.split('#')[0],
+      },
+      data: {
+        checked: false
+      }
+    })
 
     return res.redirect(rs.website);
   } catch (error) {

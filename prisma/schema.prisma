@@ -31,7 +31,7 @@ model api {
 }
 
 model visite {
-  id        String    @id
+  id        String    @id @default(cuid())
   name      String    @unique
   user      User      @relation(fields: [userId], references: [id])
   userId    String
@@ -41,7 +41,7 @@ model visite {
 }
 
 model visiter {
-  id        String    @id
+  id        String    @id @default(cuid())
   visite    visite?   @relation(fields: [visiteId], references: [id])
   visiteId  String?
   createdAt DateTime  @default(now())
@@ -57,7 +57,7 @@ model link {
 }
 
 model tag {
-  id     String  @id
+  id     Int     @id @default(autoincrement())
   name   String
   link   link    @relation(fields: [linkId], references: [id])
   linkId String
@@ -65,8 +65,8 @@ model tag {
 }
 
 model click {
-  id        String   @id
+  id        String   @id @default(cuid())
   tag       tag      @relation(fields: [tagId], references: [id])
-  tagId     String
   createdAt DateTime @default(now())
+  tagId     Int
 }

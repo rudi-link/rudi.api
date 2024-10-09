@@ -55,7 +55,6 @@ export async function visite(request: Request, res: Response, next: NextFunction
     await db.visiter.create({
       data: {
         id: Date.now().toString(),
-        type: 'site',
         visite: {
           connect: {
             id,
@@ -72,12 +71,12 @@ export async function visite(request: Request, res: Response, next: NextFunction
 }
 
 export async function out(id: string) {
-    await db.visiter.update({
-        where: {
-            id
-        },
-        data: {
-            outedAt: Date.now().toString()
-        }
-    })
+  await db.visiter.update({
+    where: {
+      id,
+    },
+    data: {
+      outedAt: Date.now().toString(),
+    },
+  });
 }

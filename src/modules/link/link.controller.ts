@@ -19,6 +19,9 @@ export async function get(request: Request, res: Response, next: NextFunction) {
       const rs = await db.link.findMany({
         where: {
           userId: user.id
+        },
+        include: {
+          tag: true
         }
       })
 
@@ -29,6 +32,13 @@ export async function get(request: Request, res: Response, next: NextFunction) {
       where: {
         id,
         userId: user.id,
+      },
+      include: {
+        tag: {
+          include: {
+            click: true
+          }
+        }
       }
     })
 
@@ -54,6 +64,11 @@ export async function create(request: Request, res: Response, next: NextFunction
         id: Date.now().toString(),
         website,
         userId: user.id,
+        tag: {
+          create: {
+            name: "default",
+          }
+        }
       },
     });
 
@@ -73,7 +88,7 @@ export async function use(request: Request, res: Response, next: NextFunction) {
 
     const rs = await db.link.findUnique({
       where: {
-        id,
+        id: id.split('#')[0],
       },
     });
 
@@ -81,11 +96,9 @@ export async function use(request: Request, res: Response, next: NextFunction) {
       return sendNotFoundResponse(res, 'Not found');
     }
 
-    await db.visiter.create({
+    await db.click.create({
       data: {
-        id: Date.now().toString(),
-        linkId: rs.id,
-        type: 'link',
+        tagId: Number(id.split('#')[0] || 0)
       },
     });
 

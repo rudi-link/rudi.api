@@ -3,29 +3,30 @@ import { RequestWithUser } from '../../types/auth';
 import { db } from '../../utils/db.server';
 import { sendBadRequestResponse, sendNotFoundResponse } from '../../utils/responseHandler';
 import { checkURL } from './link.service';
+import HttpStatusCode from '../../utils/HttpStatusCode';
 
 export async function get(request: Request, res: Response, next: NextFunction) {
   try {
     const {
       user,
       params: { id },
-    } = request as RequestWithUser & {params: {id: string | 'all'}};
-    
+    } = request as RequestWithUser & { params: { id: string | 'all' } };
+
     if (!id) {
       return sendBadRequestResponse(res, 'Id params required !');
     }
 
-    if(id === 'all'){
+    if (id === 'all') {
       const rs = await db.link.findMany({
         where: {
-          userId: user.id
+          userId: user.id,
         },
         include: {
-          tag: true
-        }
-      })
+          tag: true,
+        },
+      });
 
-      return res.send(rs)
+      return res.send(rs);
     }
 
     const rs = await db.link.findMany({
@@ -36,22 +37,22 @@ export async function get(request: Request, res: Response, next: NextFunction) {
       include: {
         tag: {
           include: {
-            click: true
-          }
-        }
-      }
-    })
+            click: true,
+          },
+        },
+      },
+    });
 
     await db.link.update({
       where: {
-        id
+        id,
       },
       data: {
-        checked: true
-      }
-    })
+        checked: true,
+      },
+    });
 
-    return res.send(rs)
+    return res.send(rs);
   } catch (error) {
     next(error);
   }
@@ -61,8 +62,8 @@ export async function create(request: Request, res: Response, next: NextFunction
   try {
     const {
       user,
-      body: { website },
-    } = request as RequestWithUser<{ website: string }>;
+      body: { website, tag },
+    } = request as RequestWithUser<{ website: string, tag: {name: string}[] }>;
 
     if (!(await checkURL(website))) {
       return sendBadRequestResponse(res, 'URL invalid');
@@ -70,14 +71,14 @@ export async function create(request: Request, res: Response, next: NextFunction
 
     const rs = await db.link.create({
       data: {
-        id: Date.now().toString(),
+        id: website.split('://')[1].split('.')[0],
         website,
         userId: user.id,
         tag: {
-          create: {
-            name: "default",
+          createMany: {
+            data: tag
           }
-        }
+        },
       },
     });
 
@@ -92,12 +93,12 @@ export async function use(request: Request, res: Response, next: NextFunction) {
     const { id } = request.params;
 
     if (!id) {
-      return sendBadRequestResponse(res, 'Id params required !');
+      return sendBadRequestResponse(res, `params required !`);
     }
 
     const rs = await db.link.findUnique({
       where: {
-        id: id.split('#')[0],
+        id: id.split('@')[0],
       },
     });
 
@@ -105,20 +106,41 @@ export async function use(request: Request, res: Response, next: NextFunction) {
       return sendNotFoundResponse(res, 'Not found');
     }
 
-    await db.click.create({
-      data: {
-        tagId: Number(id.split('#')[0] || 0)
-      },
-    });
+    if (id.split('@')[1]) {
+      if (!(await db.tag.findUnique({ where: { id: Number(id.split('@')[1]), linkId: rs.id } })))
+        return sendBadRequestResponse(res, 'Bad request');
+      await db.click.create({
+        data: {
+          tagId: Number(id.split('@')[1]),
+        },
+      });
+    } else {
+      const tag = await db.tag.findMany({
+        where: {
+          linkId: rs.id,
+          name: 'default',
+        },
+      });
+
+      if (tag.length !== 1) {
+        return res.status(HttpStatusCode.CONFLICT).send();
+      }
+
+      await db.click.create({
+        data: {
+          tagId: tag[0].id,
+        },
+      });
+    }
 
     await db.link.update({
       where: {
-        id: id.split('#')[0],
+        id: id.split('@')[0],
       },
       data: {
-        checked: false
-      }
-    })
+        checked: false,
+      },
+    });
 
     return res.redirect(rs.website);
   } catch (error) {

@@ -49,12 +49,13 @@ model visiter {
 }
 
 model link {
-  id      String @id
-  website String
-  user    User   @relation(fields: [userId], references: [id])
-  userId  String
-  tag     tag[]
-  checked Boolean @default(true)
+  id        String   @id
+  website   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  tag       tag[]
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
 
 model tag {

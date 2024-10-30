@@ -24,12 +24,15 @@ export async function get(request: Request, res: Response, next: NextFunction) {
         include: {
           tag: true,
         },
+        orderBy: {
+          createdAt: 'asc'
+        }
       });
 
       return res.send(rs);
     }
 
-    const rs = await db.link.findMany({
+    const rs = await db.link.findUnique({
       where: {
         id,
         userId: user.id,
@@ -37,7 +40,11 @@ export async function get(request: Request, res: Response, next: NextFunction) {
       include: {
         tag: {
           include: {
-            click: true,
+            click: {
+              orderBy: {
+                createdAt: 'desc'
+              }
+            },
           },
         },
       },
@@ -109,6 +116,7 @@ export async function use(request: Request, res: Response, next: NextFunction) {
     if (id.split('@')[1]) {
       if (!(await db.tag.findUnique({ where: { id: Number(id.split('@')[1]), linkId: rs.id } })))
         return sendBadRequestResponse(res, 'Bad request');
+
       await db.click.create({
         data: {
           tagId: Number(id.split('@')[1]),

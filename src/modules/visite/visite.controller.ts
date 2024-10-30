@@ -43,6 +43,26 @@ export async function getAll(request: Request, res: Response, next: NextFunction
   }
 }
 
+export async function create(request: Request, res: Response, next: NextFunction) {
+  try {
+    const {
+      user,
+      body: { name },
+    } = request as RequestWithUser<{ name: string}>;
+
+    const rs = await db.visite.create({
+      data: {
+        userId: user.id,
+        name
+      }
+    })
+
+    res.send(rs)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export async function visite(request: Request, res: Response, next: NextFunction) {
   try {
     const id = request.query.id as string;

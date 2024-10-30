@@ -10,7 +10,7 @@
     "seed": "npx prisma db seed",
     "build": "npx tsc",
     "start": "npx prisma db push && node dist/index.js",
-    "dev": "ts-node-dev src/index.ts"
+    "dev": "npx prisma db push && ts-node-dev src/index.ts"
   },
   "keywords": [
     "nodejs",

@@ -21,6 +21,15 @@ export async function getOne(request: Request, res: Response, next: NextFunction
       },
     });
 
+    await db.visite.update({
+      where: {
+        id: rs?.id
+      },
+      data: {
+        checked: true
+      }
+    })
+
     return res.send(rs);
   } catch (error) {
     next(error);

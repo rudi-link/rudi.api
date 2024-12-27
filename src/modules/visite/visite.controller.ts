@@ -93,7 +93,16 @@ export async function visite(request: Request, res: Response, next: NextFunction
       },
     });
 
-    return res.status(400).send('ok');
+    await db.visite.update({
+      where: {
+        id
+      },
+      data: {
+        checked: false
+      }
+    })
+
+    return res.send('ok');
   } catch (error) {
     next(error);
   }

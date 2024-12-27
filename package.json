@@ -9,7 +9,7 @@
   "scripts": {
     "seed": "npx prisma db seed",
     "build": "npx tsc",
-    "start": "npx prisma db seed && prisma db push && node dist/index.js",
+    "start": "prisma db push && npx prisma db seed && node dist/index.js",
     "dev": "npx prisma db push && ts-node-dev src/index.ts"
   },
   "keywords": [
